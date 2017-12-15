@@ -1,75 +1,71 @@
-// 2013011769_KangSeungWon_508
+// 2013011769_Kang_SeungWon_508
 
 #include <cstdio>
-#include <vector>
-#include <queue>
 #include <stack>
+#include <queue>
 using namespace std;
 
-void InsertDegree0(vector< vector<int> >& graph, stack<int>& search, vector<int>& degrees);
+#define MAX_NUM_OF_VERTICE      1000
+
+int N;
+int visited[MAX_NUM_OF_VERTICE + 1];
+int graph[MAX_NUM_OF_VERTICE + 1][MAX_NUM_OF_VERTICE + 1];
+stack<int> result;
+
+int dfs(int currentVertex) {
+    int i;
+
+    visited[currentVertex] = 1;
+
+    for (i = 1; i <= N; ++i) {
+        if (graph[currentVertex][i]) {
+            graph[currentVertex][i] = 0;
+
+            // if the circulation exists
+            if (visited[i] == 1) return -1;
+
+            // dfs
+            if (visited[i] == 0 && dfs(i) == -1) return -1;
+        }
+    }
+
+    // it is visited and no need to check
+    visited[currentVertex] = -1;
+
+    // push the result
+    result.push(currentVertex);
+
+    return 0;
+}
 
 int main() {
-    int N, x, y, i;
-    vector< vector<int> > graph;
-    vector<int> degrees;
-    queue<int> resultQueue;
-    stack<int> search;
+    int x, y, i, res;
     
     scanf("%d", &N);
-    graph.resize(N + 1, vector<int>(N+1, 0));
-    degrees.resize(N + 1, 0);
 
     while(scanf("%d%d", &x, &y) != EOF) {
-        if (!graph[x][y]) {
-            graph[x][y] = 1;
-            ++degrees[y];
-        }
+        graph[x][y] = 1;
     }
-    
-    InsertDegree0(graph, search, degrees);
-    
-    while (!search.empty()) {
-        int currentVertex = search.top();
-        search.pop();
-        
-        resultQueue.push(currentVertex);
-        //degrees[currentVertex] = -1;
-        
-        for (i = 1; i <= N; ++i) {
-            if (graph[currentVertex][i]) {
-                graph[currentVertex][i] = 0;
-                --degrees[i];
-            }
-        }
 
-        InsertDegree0(graph, search, degrees);
-    }
-    
     for (i = 1; i <= N; ++i) {
-        if (degrees[i] >= 0) break;
+        if (!visited[i]) res = dfs(i);
+        if (res == -1) break;
     }
-    
+
     if (i == N + 1) {
         printf("1\n");
-        while (!resultQueue.empty()) {
-            printf("%d ", resultQueue.front());
-            resultQueue.pop();
+
+        while (!result.empty()) {
+            printf("%d ", result.top());
+            result.pop();
         }
-        printf("\n");
-    }
-    
-    else {
+    } else {
         printf("0\n");
+
+        while (!result.empty()) {
+            printf("%d ", result.top());
+            result.pop();
+        }
     }
 }
 
-void InsertDegree0(vector< vector<int> >& graph, stack<int>& search, vector<int>& degrees) {
-    int i, j;
-    
-    for (i = 1; i < degrees.size(); ++i) {
-        if (degrees[i] == 0) {
-            search.push(i);
-            degrees[i] = -1;
-        }
-    }
-}
